@@ -155,7 +155,7 @@ if(isset($_GET['buat']) && !empty($_GET['buat'])){
                 <?php
                     $dir = scandir($foldeFig);
                     foreach($dir as $file){
-                        if(!is_dir(($file))){
+                        if(!is_dir(($file)) && in_array(pathinfo($file)['extension'],$allowExt)){
                             ?>
                             <tr>
                                 <td><a href="./?edit=<?= urlencode(base64_encode($file))?>"><?=$file?></td>
