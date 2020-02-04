@@ -51,7 +51,7 @@ if(empty($_SESSION['EMAIL'])){
 
 
 if(isset($_GET['buat']) && !empty($_GET['buat'])){
-    $file = preg_replace("/[^A-Za-z0-9 .]/", '', $_GET['buat']);
+    $file = preg_replace("/[^A-Za-z0-9_.]/", '', $_GET['buat']);
     $files  = pathinfo($file);
     if(in_array($files['extension'],$allowExt)){
         if(!file_exists("$foldeFig/$file")){
@@ -85,7 +85,7 @@ if(isset($_GET['buat']) && !empty($_GET['buat'])){
         <?php 
         
         if(isset($_GET['edit']) && !empty($_GET['edit'])){
-            $file = preg_replace("/[^A-Za-z0-9 .]/", '', urldecode(base64_decode($_GET['edit'])));
+            $file = preg_replace("/[^A-Za-z0-9_.]/", '', urldecode(base64_decode($_GET['edit'])));
             if(file_exists("$foldeFig/$file")){
                 if(isset($_GET['simpan'])){
                     if(!empty($_POST['filename'])){

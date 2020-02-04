@@ -12,6 +12,10 @@ for authentication, i use IMAP to company email server. you can specify which em
 
 Do you have another solution for managing microservices configuration?
 
+# USING IT
+
+i am using it with docker, everytime docker started, it will download configuration. when i need to change configuration, just restart all services.
+
 # Requirements
 - PHP 7 or above
 - php-imap for authentication
