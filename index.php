@@ -1,7 +1,27 @@
 <?php
+/**
+ * Created by Ibnu Maksum 2020
+ * 
+ * Read README.md before using this code
+ * 
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ */
+
 session_start();
+
+
+
+// CONFIGURATION
+
+$mailServer = "mail.carsworld.co.id";
+$allowedEmails = ['ibnumaksum@carsworld'];
+
 $foldeFig = "config";
 $allowExt = array('ini','env','txt');
+
+//END OF CONFIGURATION
+
 
 if(empty($_SESSION['EMAIL'])){
     if (!isset($_SERVER['PHP_AUTH_USER'])) {
@@ -10,14 +30,18 @@ if(empty($_SESSION['EMAIL'])){
         echo 'You shall not pass';
         exit;
     } else {
-        $email = $_SERVER['PHP_AUTH_USER'];
-        $pass  = $_SERVER['PHP_AUTH_PW'];
-        $host = "mail.carsworld.co.id";
-        ini_set('default_socket_timeout',3);
-        if($mbox=imap_open('{'.$host.':143/imap/tls/novalidate-cert}',$email,$pass)){
-            $_SESSION['EMAIL'] = $email;
-            header('location: ./?sukses');
-            exit();
+        if(in_array($_SERVER['PHP_AUTH_USER'],$allowedEmails)){
+            $email = $_SERVER['PHP_AUTH_USER'];
+            $pass  = $_SERVER['PHP_AUTH_PW'];
+            ini_set('default_socket_timeout',3);
+            if($mbox=imap_open('{'.$mailServer.':143/imap/tls/novalidate-cert}',$email,$pass)){
+                $_SESSION['EMAIL'] = $email;
+                header('location: ./?sukses');
+                exit();
+            }else{
+                header('location: ./?invalid');
+                exit();
+            }
         }else{
             header('location: ./?invalid');
             exit();
@@ -75,18 +99,18 @@ if(isset($_GET['buat']) && !empty($_GET['buat'])){
                                         unlink("$foldeFig/$file");
                                         $file = $_POST['filename'];
                                     }else
-                                        $msg = "File sudah ada";
+                                        $msg = "File Exists";
                                 }else{
-                                    $msg = "Ekstensi tidak valid. Only: ".implode(",",$allowExt);
+                                    $msg = "File extention not allowed. Only: ".implode(",",$allowExt);
                                 }
                             }else{
-                                $msg = "file name baru sudah ada";
+                                $msg = "File exists.";
                             }
                         }
                         if(file_put_contents("$foldeFig/$file",$_POST['isi']))
-                            $msg = "data disimpan";
+                            $msg = "File Saved";
                         else
-                            $msg = "data gagal disimpan, permission?";
+                            $msg = "Failed to save file, Write permission allowed?";
                     }else{
                         $msg = "file dihapus";
                         unlink("$foldeFig/$file");
@@ -99,17 +123,17 @@ if(isset($_GET['buat']) && !empty($_GET['buat'])){
                   </div><?php
                 } 
                 ?>
-                <a href="./" class="button is-warning">kembali</a>
+                <a href="./" class="button is-warning">Back</a>
                 <hr>
                 <form method="post" action="./?simpan&edit=<?=$_GET['edit']?>" onsubmit="return confirm('Simpan File?')">
                 <div class="columns">
                     <div class="column">
                         <input class="input" type="text" name="filename" value="<?=$file?>">
-                        <p class="help">Jangan ada spasi, alphanumeric only, kosongkan jika ingin hapus file</p>
+                        <p class="help">Don't use space, alphanumeric only, Empty filename to delete file</p>
                     </div>
                 </div>
                 <textarea id="editor" name="isi" class="textarea" rows="50"><?php if(file_exists("$foldeFig/$file"))echo file_get_contents("$foldeFig/$file")?></textarea>
-                <button type="submit" class="button is-primary is-fullwidth">Simpan</button>
+                <button type="submit" class="button is-primary is-fullwidth">Save</button>
                 <!-- Create a simple CodeMirror instance -->
                 <link rel="stylesheet" href="css/codemirror.css">
                 <script src="js/codemirror.js"></script>
@@ -135,7 +159,7 @@ if(isset($_GET['buat']) && !empty($_GET['buat'])){
             <div class="columns">
                 <div class="column is-four-fifths">
                     <input class="input" type="text" name="buat" placeholder="nama_config.env" required>
-                    <p class="help">Jangan ada spasi, alphanumeric only</p>
+                    <p class="help">No space, alphanumeric only</p>
                 </div>
                 <div class="column">
                     <button type="submit" class="button is-primary is-fullwidth">Buat File</button>
