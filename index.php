@@ -1,52 +1,45 @@
 <?php
+session_start();
 /**
  * Created by Ibnu Maksum 2020
- * 
+ *
  * Read README.md before using this code
- * 
+ *
  * This file is subject to the terms and conditions defined in
  * file 'LICENSE', which is part of this source code package.
  */
 
-session_start();
 
 
 
 // CONFIGURATION
 
 $mailServer = "mail.carsworld.co.id";
-$allowedEmails = ['ibnumaksum@carsworld'];
+$allowedEmails = ['ibnumaksum@carsworld.id'];
 
 $foldeFig = "config";
 $allowExt = array('ini','env','txt');
 
-//END OF CONFIGURATION
-
-
-if(empty($_SESSION['EMAIL'])){
-    if (!isset($_SERVER['PHP_AUTH_USER'])) {
-        header('WWW-Authenticate: Basic realm="Input email and password"');
-        header('HTTP/1.0 401 Unauthorized');
-        echo 'You shall not pass';
-        exit;
-    } else {
-        if(in_array($_SERVER['PHP_AUTH_USER'],$allowedEmails)){
-            $email = $_SERVER['PHP_AUTH_USER'];
-            $pass  = $_SERVER['PHP_AUTH_PW'];
-            ini_set('default_socket_timeout',3);
-            if($mbox=imap_open('{'.$mailServer.':143/imap/tls/novalidate-cert}',$email,$pass)){
-                $_SESSION['EMAIL'] = $email;
-                header('location: ./?sukses');
-                exit();
-            }else{
-                header('location: ./?invalid');
-                exit();
-            }
-        }else{
-            header('location: ./?invalid');
-            exit();
-        }
+if(!empty($_SERVER['PHP_AUTH_USER']) && in_array($_SERVER['PHP_AUTH_USER'],$allowedEmails)){
+    $email = $_SERVER['PHP_AUTH_USER'];
+    $pass  = $_SERVER['PHP_AUTH_PW'];
+    ini_set('default_socket_timeout',3);
+    if($mbox=@imap_open('{'.$mailServer.':143/imap/tls/novalidate-cert}',$email,$pass)){
+        $_SESSION['EMAIL'] = $email;
+    }else{
+        unset($_SERVER['PHP_AUTH_USER']);
+        unset($_SESSION['EMAIL']);
+        header('location: ./?invalid&email');
+        die();
     }
+}
+
+//END OF CONFIGURATION
+if(empty($_SESSION['EMAIL'])){
+    header('WWW-Authenticate: Basic realm="Input email and password"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo 'You shall not pass';
+    die();
 }
 
 
