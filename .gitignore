@@ -1,2 +1,4 @@
 config/**
 !config/index.html
+history/**
+!history/index.html
