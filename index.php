@@ -173,18 +173,18 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                 if(!empty($_POST['barisAsli']) && !empty($_POST['barisEdit']) && !empty($_POST['files'])){
                     $files = explode(",",$_POST['files']);
                     foreach($files as $file){
-                        $data = file_get_contents("$foldeFig/$file");
-                        $md5o = md5($data);
-                        $data = str_replace($_POST['barisAsli'],$_POST['barisEdit'],$data);
+                        $datalama = file_get_contents("$foldeFig/$file");
+                        $md5o = md5($datalama);
+                        $data = str_replace($_POST['barisAsli'],$_POST['barisEdit'],$datalama);
                         $md5n = md5($data);
                         if($md5o==$md5n){
                             echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-warning is-light\">$file no changes</a><br>";
                         }else{
                             if (file_put_contents("$foldeFig/$file", $data)){
                                 echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-link is-light\">$file changes.</a><br>";
-                                if($md5o!=$md5n && !empty($data)){
+                                if($md5o!=$md5n && !empty($datalama)){
                                     if(!file_exists("history/".$file)) mkdir("history/".$file);
-                                    file_put_contents("history/".$file."/".str_replace("@","_at_",$_SESSION['EMAIL'])."_".date("Y-m-d_h.i.s").".txt",$data);
+                                    file_put_contents("history/".$file."/".str_replace("@","_at_",$_SESSION['EMAIL'])."_".date("Y-m-d_h.i.s").".txt",$datalama);
                                 }
                             }else
                                 echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-danger is-light\">Failed to save $file , Write permission allowed?</a><br>";
