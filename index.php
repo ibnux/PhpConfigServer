@@ -106,13 +106,13 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                             $data = file_get_contents("$foldeFig/$file");
                             $md5o = md5($data);
                             $md5n = md5($_POST['isi']);
-                            if (file_put_contents("$foldeFig/$file", $_POST['isi']))
+                            if (file_put_contents("$foldeFig/$file", $_POST['isi'])){
                                 $msg = "File Saved";
                                 if($md5o!=$md5n && !empty($data)){
                                     if(!file_exists("history/".$file)) mkdir("history/".$file);
                                     file_put_contents("history/".$file."/".str_replace("@","_at_",$_SESSION['EMAIL'])."_".date("Y-m-d_h.i.s").".txt",$data);
                                 }
-                            else
+                            }else
                                 $msg = "Failed to save file, Write permission allowed?";
                         } else {
                             if(!empty($_POST)){
@@ -154,17 +154,78 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                     <ul>
                     <?php
                     $history = "history/$file/";
-                    $files = scandir($history);
-                    $files = array_reverse($files);
-                    foreach($files as $fl){
-                        if(!is_dir("$history$fl"))
-                            echo "<li><a href=\"$history$fl\" target=\"_blank\">$fl</li>\n";
+                    if(file_exists($history)){
+                        $files = scandir($history);
+                        $files = array_reverse($files);
+                        foreach($files as $fl){
+                            if(!is_dir("$history$fl"))
+                                echo "<li><a href=\"$history$fl\" target=\"_blank\">$fl</li>\n";
+                        }
                     }
                     ?></ul>
                 <?php
                 } else {
                     echo "no file";
                 }
+            } else if(isset($_GET['summary'])) {
+                echo '<a class="button is-warning is-small" href="./">back</a><br>&nbsp;';
+                //changes all
+                if(!empty($_POST['barisAsli']) && !empty($_POST['barisEdit']) && !empty($_POST['files'])){
+                    $files = explode(",",$_POST['files']);
+                    foreach($files as $file){
+                        $data = file_get_contents("$foldeFig/$file");
+                        $md5o = md5($data);
+                        $data = str_replace($_POST['barisAsli'],$_POST['barisEdit'],$data);
+                        $md5n = md5($data);
+                        if($md5o==$md5n){
+                            echo "<span class=\"tag is-warning is-light\">$file no changes</span><br>";
+                        }else{
+                            if (file_put_contents("$foldeFig/$file", $data)){
+                                echo "<span class=\"tag is-link is-light\">$file changes.</span><br>";
+                                if($md5o!=$md5n && !empty($data)){
+                                    if(!file_exists("history/".$file)) mkdir("history/".$file);
+                                    file_put_contents("history/".$file."/".str_replace("@","_at_",$_SESSION['EMAIL'])."_".date("Y-m-d_h.i.s").".txt",$data);
+                                }
+                            }else
+                                echo "<span class=\"tag is-danger is-light\">Failed to save $file , Write permission allowed?</span><br>";
+                        }
+                    }
+                    echo "<br>";
+                }
+
+                $files = scandir("$foldeFig/");
+                $result = array(); // ["md5":{"baris":"","files":[]}]
+                foreach($files as $file){
+                    if(!is_dir("$foldeFig/$file") && $file!='index.html'){
+                        $bariss = explode("\n", str_replace("\r","",file_get_contents("$foldeFig/$file")));
+                        foreach($bariss as $baris){
+                            $baris = trim($baris);
+                            if(!empty($baris)){
+                                $md5 = md5($baris);
+                                $result[$md5]['baris'] = $baris;
+                                $result[$md5]['files'][] = $file;
+                            }
+                        }
+                    }
+                }
+                ?><table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Value</th>
+                            <th>Files</th>
+                            <th>Edit</th>
+                            <th>Save</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                <?php
+                foreach($result as $key => $baris){
+                    echo "<form method='POST'><tr><td><input class='input' type='text' name='barisAsli' readonly value=\"".htmlentities($baris['baris'])."\"></td><td><span class=\"tag is-link is-light\">".implode('</span> <span class="tag is-link is-light">',$baris['files'])."</span></td>\n";
+                    echo "<td><input class='input is-success' type='text' name='barisEdit' value=\"".htmlentities($baris['baris'])."\"></td><td><button class=\"button is-fullwidth is-link\" type=\"submit\" onsubmit=\"return confirm('Ubah File ".implode(',',$baris['files'])."?')\">save</button></td></tr>";
+                    echo "<input type='hidden' name='files' value=\"".implode(',',$baris['files'])."\"></form>\n\n";
+                }?>
+                    </tbody>
+                </table><?php
             } else {
                 if (!empty($msg)) {
                 ?><div class="notification">
@@ -184,6 +245,7 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                     </div>
                 </form>
                 <hr>
+                <a class="button is-link is-small" href="./?summary">summary</a>
                 <table class="table is-fullwidth is-striped is-hoverable">
                     <thead>
                         <tr>
