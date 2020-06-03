@@ -168,7 +168,7 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                     echo "no file";
                 }
             } else if(isset($_GET['summary'])) {
-                echo '<a class="button is-warning is-small" href="./">back</a><br>&nbsp;';
+                echo '<a class="button is-warning is-small" href="./">back</a><br>&nbsp;<br>';
                 //changes all
                 if(!empty($_POST['barisAsli']) && !empty($_POST['barisEdit']) && !empty($_POST['files'])){
                     $files = explode(",",$_POST['files']);
@@ -178,16 +178,16 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                         $data = str_replace($_POST['barisAsli'],$_POST['barisEdit'],$data);
                         $md5n = md5($data);
                         if($md5o==$md5n){
-                            echo "<span class=\"tag is-warning is-light\">$file no changes</span><br>";
+                            echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-warning is-light\">$file no changes</a><br>";
                         }else{
                             if (file_put_contents("$foldeFig/$file", $data)){
-                                echo "<span class=\"tag is-link is-light\">$file changes.</span><br>";
+                                echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-link is-light\">$file changes.</a><br>";
                                 if($md5o!=$md5n && !empty($data)){
                                     if(!file_exists("history/".$file)) mkdir("history/".$file);
                                     file_put_contents("history/".$file."/".str_replace("@","_at_",$_SESSION['EMAIL'])."_".date("Y-m-d_h.i.s").".txt",$data);
                                 }
                             }else
-                                echo "<span class=\"tag is-danger is-light\">Failed to save $file , Write permission allowed?</span><br>";
+                                echo "<a href=\"./?summary#".md5($_POST['barisEdit'])."\" class=\"tag is-danger is-light\">Failed to save $file , Write permission allowed?</a><br>";
                         }
                     }
                     echo "<br>";
@@ -208,21 +208,21 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                         }
                     }
                 }
-                ?><table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+                ?><table class="table is-bordered is-narrow is-hoverable is-fullwidth">
                     <thead>
                         <tr>
                             <th>Value</th>
-                            <th>Files</th>
-                            <th>Edit</th>
                             <th>Save</th>
                         </tr>
                     </thead>
                     <tbody>
                 <?php
                 foreach($result as $key => $baris){
-                    echo "<form method='POST'><tr><td><input class='input' type='text' name='barisAsli' readonly value=\"".htmlentities($baris['baris'])."\"></td><td><span class=\"tag is-link is-light\">".implode('</span> <span class="tag is-link is-light">',$baris['files'])."</span></td>\n";
-                    echo "<td><input class='input is-success' type='text' name='barisEdit' value=\"".htmlentities($baris['baris'])."\"></td><td><button class=\"button is-fullwidth is-link\" type=\"submit\" onsubmit=\"return confirm('Ubah File ".implode(',',$baris['files'])."?')\">save</button></td></tr>";
-                    echo "<input type='hidden' name='files' value=\"".implode(',',$baris['files'])."\"></form>\n\n";
+                    echo "<form method='POST'><tr>\n";
+                    echo "<td id=\"$key\"><input class='input is-success' type='text' name='barisEdit' value=\"".htmlentities($baris['baris'])."\"></td><td width=\"80\"><button class=\"button is-link\" type=\"submit\" onsubmit=\"return confirm('Ubah File ".implode(',',$baris['files'])."?')\">save</button></td></tr>";
+                    echo "<input class='input' type='hidden' name='barisAsli' readonly value=\"".htmlentities($baris['baris'])."\"><input type='hidden' name='files' value=\"".implode(',',$baris['files'])."\"></form>\n\n";
+                    echo "<tr><td colspan='4'><span class=\"tag is-link\">".implode('</span> <span class="tag is-link">',$baris['files'])."</span></td></tr>\n";
+                    echo "<tr><td colspan='4' style=\"background-color:#f5f5f5\"></td></tr>\n";
                 }?>
                     </tbody>
                 </table><?php
