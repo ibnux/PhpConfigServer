@@ -211,14 +211,14 @@ if (isset($_GET['buat']) && !empty($_GET['buat'])) {
                 ?><table class="table is-bordered is-narrow is-hoverable is-fullwidth">
                     <thead>
                         <tr>
-                            <th>Value</th>
+                            <th>Value <small>hanya bisa save perbaris</small></th>
                             <th>Save</th>
                         </tr>
                     </thead>
                     <tbody>
                 <?php
                 foreach($result as $key => $baris){
-                    echo "<form method='POST'><tr>\n";
+                    echo "<form method='POST' action=\"./?summary\"><tr>\n";
                     echo "<td id=\"$key\"><input class='input is-success' type='text' name='barisEdit' value=\"".htmlentities($baris['baris'])."\"></td><td width=\"80\"><button class=\"button is-link\" type=\"submit\" onsubmit=\"return confirm('Ubah File ".implode(',',$baris['files'])."?')\">save</button></td></tr>";
                     echo "<input class='input' type='hidden' name='barisAsli' readonly value=\"".htmlentities($baris['baris'])."\"><input type='hidden' name='files' value=\"".implode(',',$baris['files'])."\"></form>\n\n";
                     echo "<tr><td colspan='4'><span class=\"tag is-link\">".implode('</span> <span class="tag is-link">',$baris['files'])."</span></td></tr>\n";
